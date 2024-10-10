@@ -77,16 +77,4 @@ public class UserService {
         return userRepository.save(user);
     }
 
-//    @Scheduled(initialDelay = 2, fixedRate = 3, timeUnit = TimeUnit.SECONDS)
-//    public void simpleScheduled() {
-//        count++;
-//        System.out.println("Scheduled task: " + count);
-//    }
-
-    @CacheEvict(value = "users", allEntries = true)
-    @Scheduled(initialDelay = 5, fixedRate = 5, timeUnit = TimeUnit.SECONDS)
-    public void cleanCache() {
-        System.out.println("Cache cleaned");
-
-    }
 }
