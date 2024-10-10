@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import uz.jk.bank.springcache.entity.UserEntity;
 import uz.jk.bank.springcache.repository.UserRepository;
 
@@ -15,6 +17,8 @@ import java.net.URL;
 import java.util.List;
 
 @SpringBootApplication
+@EnableCaching
+@EnableScheduling
 public class SpringCacheApplication {
 
     private static ObjectMapper objectMapper;

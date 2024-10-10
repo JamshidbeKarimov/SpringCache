@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uz.jk.bank.springcache.entity.UserEntity;
 import uz.jk.bank.springcache.service.UserService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -20,12 +22,17 @@ public class UserController {
         return userService.saveUser(user);
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public UserEntity getUserById(Long id) {
         return userService.findById(id);
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/all")
+    public List<UserEntity> getAllUsers() {
+        return userService.findAll();
+    }
+
+    @GetMapping("/get/{username}")
     public UserEntity getUserByUsername(String username) {
         return userService.getUserByUsername(username);
     }

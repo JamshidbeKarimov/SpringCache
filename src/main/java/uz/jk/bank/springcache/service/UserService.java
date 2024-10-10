@@ -2,17 +2,32 @@ package uz.jk.bank.springcache.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uz.jk.bank.springcache.entity.UserEntity;
 import uz.jk.bank.springcache.repository.UserRepository;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final ConcurrentHashMap<Long, UserEntity> cacheMap = new ConcurrentHashMap<>();
+
+    private int count = 0;
+//    private final Cache cache;
+//    public UserService(UserRepository userRepository, CacheManager cacheManager) {
+//        this.userRepository = userRepository;
+//        this.cache = cacheManager.getCache("users");
+//    }
 
 
     public UserEntity getUserByUsername(String username) {
@@ -24,36 +39,54 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @SneakyThrows
-    public UserEntity findById(Long id) {
-        return cacheMap.computeIfAbsent(id, (key) -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            return userRepository.findById(key)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-        });
-
-//        if (cacheMap.get(id) != null) {
-//            return cacheMap.get(id);
+//    public UserEntity findById(Long id) {
+//        if (cache.get(id, UserEntity.class) != null) {
+//            return cache.get(id, UserEntity.class);
 //        }
-//        Thread.sleep(2000);
+//
 //        UserEntity userEntity = userRepository.findById(id)
 //                .orElseThrow(() -> new RuntimeException("User not found"));
-//        cacheMap.put(userEntity.getId(), userEntity);
+//        cache.put(id, userEntity);
 //        return userEntity;
+//    }
+
+    @SneakyThrows
+    @Cacheable(value = "users", key = "#id")
+    public UserEntity findById(Long id) {
+        Thread.sleep(1000);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    @SneakyThrows
+    @Cacheable(value = "users", key="#root.methodName")
+    public List<UserEntity> findAll() {
+        Thread.sleep(3000);
+        return userRepository.findAll();
+    }
+
+
+    @CacheEvict(value = "users", key = "#id")
     public void deleteUser(Long id) {
-        cacheMap.remove(id);
+//        cache.evict(id);
         userRepository.deleteById(id);
-
     }
 
+    @CachePut(value = "users", key = "#user.id")
     public UserEntity updateUser(UserEntity user) {
-        cacheMap.put(user.getId(), user);
         return userRepository.save(user);
+    }
+
+//    @Scheduled(initialDelay = 2, fixedRate = 3, timeUnit = TimeUnit.SECONDS)
+//    public void simpleScheduled() {
+//        count++;
+//        System.out.println("Scheduled task: " + count);
+//    }
+
+    @CacheEvict(value = "users", allEntries = true)
+    @Scheduled(initialDelay = 5, fixedRate = 5, timeUnit = TimeUnit.SECONDS)
+    public void cleanCache() {
+        System.out.println("Cache cleaned");
+
     }
 }
